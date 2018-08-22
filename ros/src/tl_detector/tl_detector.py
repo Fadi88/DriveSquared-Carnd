@@ -98,7 +98,7 @@ class TLDetector(object):
             self.upcoming_red_light_pub.publish(Int32(self.last_wp))
         self.state_count += 1
 
-    def get_closest_waypoint(self, pose):
+    def get_closest_waypoint(self , x , y):
         """Identifies the closest path waypoint to the given position
             https://en.wikipedia.org/wiki/Closest_pair_of_points_problem
         Args:
@@ -122,8 +122,6 @@ class TLDetector(object):
         """
         #till we have a classifier
         #and of course only works in the sim
-        temp_bypass = True
-        
         if temp_bypass :
             return light.state
         
@@ -155,16 +153,17 @@ class TLDetector(object):
             car_wp_idx = self.get_closest_waypoint(position.x, position.y)
             diff = len(self.waypoints.waypoints)
             for i, light in enumerate(self.lights):
-                #Get stop line waypoint index
+                # Get sto line waypoint index
                 line = stop_line_positions[i]
                 temp_wp_idx = self.get_closest_waypoint(line[0], line[1])
-                # Find closeset stop line waypoint index
-                d = temp_wp_idx - car_wp_idx
+                # Find closest stop line waypoint index
+                d = temp_wp_idx - car_wp_idx  # Number of indices between the car's
+                                              # position and the tl waypoint
                 if d >= 0 and d < diff:
                     diff = d
                     closest_light = light
                     line_wp_idx = temp_wp_idx
-    
+
         if closest_light:
             state = self.get_light_state(closest_light)
             return line_wp_idx, state
