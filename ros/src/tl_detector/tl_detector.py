@@ -122,9 +122,11 @@ class TLDetector(object):
         """
         #till we have a classifier
         #and of course only works in the sim
+        temp_bypass = True
+
         if temp_bypass :
             return light.state
-        
+
         if(not self.has_image):
             self.prev_light_loc = None
             return False
