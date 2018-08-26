@@ -37,8 +37,8 @@ class TLClassifier(object):
                 ( scores, classes, num) = sess.run(
                     [self.predicted_score_tensor, self.predicted_classes_tensor, self.predicted_obj_num_tensor],
                             {self.input_tensor: [image]})
-                rospy.logwarn(classes)
-                rospy.logwarn(scores)
+                #rospy.logwarn(classes)
+                #rospy.logwarn(scores)
 
 			
 
