@@ -3,6 +3,7 @@ import rospy
 import tensorflow as tf
 import numpy as np
 import cv2
+import time
 
 class TLClassifier(object):
     def __init__(self):
@@ -29,7 +30,7 @@ class TLClassifier(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-
+        t0 = time.time()
         image = np.array(image)
 
         with self.graph.as_default():
@@ -39,6 +40,7 @@ class TLClassifier(object):
                             {self.input_tensor: [image]})
                 rospy.logwarn(classes)
                 rospy.logwarn(scores)
+                rospy.logwarn(time.time() - t0)
 
 			
 
