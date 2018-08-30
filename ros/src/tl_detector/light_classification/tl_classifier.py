@@ -7,14 +7,19 @@ import time
 
 class TLClassifier(object):
     def __init__(self):
+		self.visualize = False
+		self.counter = 0
 		self.graph = tf.Graph()
+		self.class_dic = {1 : 'Red' , 2 : 'Yellow' , 3 : 'Green'}
+		self.color_dic = { 0: (255,255,255) , 1 : (0,0,255) , 2 : (0,255,255) , 3 : (0,255,0)}
+
 		with tf.Session(graph=self.graph) as sess:
 			od_graph_def = tf.GraphDef()
 			od_graph_def.ParseFromString(tf.gfile.GFile('light_classification/model_sim.pb', 'rb').read())
 			tf.import_graph_def(od_graph_def, name='')
 
 		self.input_tensor              = self.graph.get_tensor_by_name('image_tensor:0')
-		#self.bounding_boxes_tensor     = self.graph.get_tensor_by_name('detection_boxes:0')
+		self.bounding_boxes_tensor     = self.graph.get_tensor_by_name('detection_boxes:0')
 		self.predicted_score_tensor    = self.graph.get_tensor_by_name('detection_scores:0')
 		self.predicted_classes_tensor  = self.graph.get_tensor_by_name('detection_classes:0')
 		self.predicted_obj_num_tensor  = self.graph.get_tensor_by_name('num_detections:0')
@@ -35,15 +40,40 @@ class TLClassifier(object):
 
         with self.graph.as_default():
             with tf.Session(graph=self.graph) as sess :
-                ( scores, classes, num) = sess.run(
-                    [self.predicted_score_tensor, self.predicted_classes_tensor, self.predicted_obj_num_tensor],
+                ( boxes,scores, classes, num) = sess.run(
+                    [self.bounding_boxes_tensor , self.predicted_score_tensor, self.predicted_classes_tensor, self.predicted_obj_num_tensor],
                             {self.input_tensor: [image]})
-                rospy.logwarn(classes)
-                rospy.logwarn(scores)
-                rospy.logwarn(time.time() - t0)
-                rospy.logwarn(classes)
-                rospy.logwarn(scores)
+                #rospy.logwarn(classes)
+                #rospy.logwarn(scores)
+                #rospy.logwarn(time.time() - t0)
+                if self.visualize:
+                    self.save_image(image , boxes[0] , scores[0], classes[0] )
+
+                #rospy.logwarn(classes[0])
+                #rospy.logwarn(scores[0])
+                for detected_class , score in zip(classes[0] , scores[0]):
+                    if int(detected_class) == 1 and score > 0.75 :
+                        #rospy.logwarn('*************************** RED************************')
+                        return TrafficLight.RED
 
 			
 
         return TrafficLight.UNKNOWN
+
+    def save_image(self , image , boxes , scores , classes):
+        img_shape = image.shape
+
+        for i in range(len(scores)):
+            score = scores[i]
+            box = boxes[i]
+            detected_class = classes[i]
+
+            if score > 0.75 :
+                cv2.rectangle(image , (int(box[1] * img_shape[1]) , int(box[0] * img_shape[0]) ) , ( int(box[3] * img_shape[1]) , int(box[2] * img_shape[0]) ) , self.color_dic[int(detected_class)]
+                                , 4)
+
+
+            
+        cv2.imwrite('./output_images/img_' + str(self.counter) + '.jpg' , image)
+        self.counter += 1
+        

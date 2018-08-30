@@ -129,7 +129,7 @@ class TLDetector(object):
         cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
         self.light_classifier.get_classification(cv_image)
 
-        temp_bypass = True
+        temp_bypass = False
 
         if temp_bypass :
             return light.state
@@ -171,7 +171,7 @@ class TLDetector(object):
                     closest_light = light
                     line_wp_idx = temp_wp_idx
 
-        if closest_light:
+        if closest_light :
             state = self.get_light_state(closest_light)
             return line_wp_idx, state
 
