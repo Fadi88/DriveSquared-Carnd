@@ -35,7 +35,7 @@ class TLDetector(object):
         rely on the position of the light and the camera image to predict it.
         '''
         sub3 = rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.traffic_cb)
-        sub6 = rospy.Subscriber('/image_color', Image, self.image_cb)
+        sub6 = rospy.Subscriber('/image_color', Image, self.image_cb , queue_size=1)
 
         config_string = rospy.get_param("/traffic_light_config")
         self.config = yaml.load(config_string)
@@ -127,8 +127,6 @@ class TLDetector(object):
         #till we have a classifier
         #and of course only works in the sim
         cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
-        self.light_classifier.get_classification(cv_image)
-
         temp_bypass = False
 
         if temp_bypass :
@@ -171,7 +169,7 @@ class TLDetector(object):
                     closest_light = light
                     line_wp_idx = temp_wp_idx
 
-        if closest_light :
+        if closest_light and diff < 50:
             state = self.get_light_state(closest_light)
             return line_wp_idx, state
 
