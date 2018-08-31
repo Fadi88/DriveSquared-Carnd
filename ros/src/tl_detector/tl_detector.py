@@ -169,7 +169,7 @@ class TLDetector(object):
                     closest_light = light
                     line_wp_idx = temp_wp_idx
 
-        if closest_light and diff < 50:
+        if closest_light and diff < 75:
             state = self.get_light_state(closest_light)
             return line_wp_idx, state
 
