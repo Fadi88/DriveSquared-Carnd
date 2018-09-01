@@ -8,6 +8,7 @@ import time
 class TLClassifier(object):
     def __init__(self):
 		self.visualize = False
+		self.processing_frame = False
 		self.counter = 0
 		self.graph = tf.Graph()
 		self.class_dic = {1 : 'Red' , 2 : 'Yellow' , 3 : 'Green'}
@@ -35,6 +36,12 @@ class TLClassifier(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
+        if self.processing_frame:
+            rospy.logwarn('recived new frame before processing last one droping new frame')
+            return
+    
+        self.processing_frame = True
+
         t0 = time.time()
         image = np.array(image)
 
@@ -56,9 +63,11 @@ class TLClassifier(object):
             #rospy.logwarn(scores[0])
             for detected_class , score in zip(classes[0] , scores[0]):
                 if int(detected_class) == 1 and score > 0.75 :
-                    rospy.logwarn('*************************** RED************************')
+                    rospy.logwarn('***************************RED************************')
+                    self.processing_frame = False
                     return TrafficLight.RED
 
+        self.processing_frame = False
         return TrafficLight.UNKNOWN
 
     def save_image(self , image , boxes , scores , classes):
