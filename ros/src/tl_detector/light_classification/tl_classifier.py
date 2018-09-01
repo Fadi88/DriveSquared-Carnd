@@ -19,7 +19,7 @@ class TLClassifier(object):
 		    od_graph_def.ParseFromString(tf.gfile.GFile('light_classification/model_sim.pb', 'rb').read())
 		    tf.import_graph_def(od_graph_def, name='')
 
-		    #self.bounding_boxes_tensor     = self.graph.get_tensor_by_name('detection_boxes:0')
+		    self.bounding_boxes_tensor     = self.graph.get_tensor_by_name('detection_boxes:0')
 		    self.predicted_score_tensor    = self.graph.get_tensor_by_name('detection_scores:0')
 		    self.predicted_classes_tensor  = self.graph.get_tensor_by_name('detection_classes:0')
 		    self.predicted_obj_num_tensor  = self.graph.get_tensor_by_name('num_detections:0')
@@ -39,8 +39,13 @@ class TLClassifier(object):
         image = np.array(image)
 
         with self.graph.as_default():
-            (scores, classes) = self.sess.run([self.predicted_score_tensor, self.predicted_classes_tensor],
-                                    {self.input_tensor: [image]})
+            if not self.visualize:
+                (scores, classes) = self.sess.run([self.predicted_score_tensor, self.predicted_classes_tensor],
+                                       {self.input_tensor: [image]})
+            else :
+                (boxes , scores, classes) = self.sess.run(
+                            [self.bounding_boxes_tensor ,self.predicted_score_tensor, self.predicted_classes_tensor],
+                                       {self.input_tensor: [image]})
             #rospy.logwarn(classes)
             #rospy.logwarn(scores)
             rospy.logwarn(time.time() - t0)
@@ -51,7 +56,7 @@ class TLClassifier(object):
             #rospy.logwarn(scores[0])
             for detected_class , score in zip(classes[0] , scores[0]):
                 if int(detected_class) == 1 and score > 0.75 :
-                    #rospy.logwarn('*************************** RED************************')
+                    rospy.logwarn('*************************** RED************************')
                     return TrafficLight.RED
 
         return TrafficLight.UNKNOWN
