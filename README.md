@@ -2,7 +2,7 @@
 
 | Name    | Email address |
 |---------|:-------------:|
-| Dr.Cheng Wang (Team Leader) | wangcheng@utexas.edu |
+| Dr.Cheng Wang (Team Leader) | wangcheng.pku@gmail.com |
 | Renyuan Zhang | yuanisbug@gmail.com |
 | Dhatri Chennavajula | chdhatri.b@gmail.com |
 | Siddharth Singi |siddharth.singi@gmail.com |
