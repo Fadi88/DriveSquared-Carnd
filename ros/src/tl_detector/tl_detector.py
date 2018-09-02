@@ -35,7 +35,7 @@ class TLDetector(object):
         rely on the position of the light and the camera image to predict it.
         '''
         sub3 = rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.traffic_cb)
-        sub6 = rospy.Subscriber('/image_color', Image, self.image_cb)
+        sub6 = rospy.Subscriber('/image_color', Image, self.image_cb , queue_size=1)
 
         config_string = rospy.get_param("/traffic_light_config")
         self.config = yaml.load(config_string)
@@ -43,7 +43,6 @@ class TLDetector(object):
         self.upcoming_red_light_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
 
         self.bridge = CvBridge()
-        self.light_classifier = TLClassifier()
         self.listener = tf.TransformListener()
 
         self.state = TrafficLight.UNKNOWN
@@ -53,11 +52,15 @@ class TLDetector(object):
 
         self.waypoints_2d = None
         self.waypoint_tree = None
-
+        self.wp_current = None
+        
+        self.light_classifier = TLClassifier()
+        
         rospy.spin()
 
     def pose_cb(self, msg):
         self.pose = msg
+        self.wp_current = self.get_closest_waypoint(msg.pose.position.x , msg.pose.position.y)
 
     def waypoints_cb(self, waypoints):
         self.waypoints = waypoints
@@ -93,6 +96,7 @@ class TLDetector(object):
             self.last_state = self.state
             light_wp = light_wp if state == TrafficLight.RED else -1
             self.last_wp = light_wp
+            #rospy.logwarn(str(light_wp) + '  '  + str (self.wp_current))
             self.upcoming_red_light_pub.publish(Int32(light_wp))
         else:
             self.upcoming_red_light_pub.publish(Int32(self.last_wp))
@@ -122,7 +126,8 @@ class TLDetector(object):
         """
         #till we have a classifier
         #and of course only works in the sim
-        temp_bypass = True
+        cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+        temp_bypass = False
 
         if temp_bypass :
             return light.state
@@ -130,8 +135,6 @@ class TLDetector(object):
         if(not self.has_image):
             self.prev_light_loc = None
             return False
-
-        cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
 
         #Get classification
         return self.light_classifier.get_classification(cv_image)
@@ -166,7 +169,7 @@ class TLDetector(object):
                     closest_light = light
                     line_wp_idx = temp_wp_idx
 
-        if closest_light:
+        if closest_light and diff < 75:
             state = self.get_light_state(closest_light)
             return line_wp_idx, state
 
