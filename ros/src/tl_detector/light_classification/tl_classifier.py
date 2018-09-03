@@ -6,7 +6,7 @@ import cv2
 import time
 
 class TLClassifier(object):
-    def __init__(self):
+    def __init__(self , is_site ):
 		self.visualize = False
 		self.processing_frame = False
 		self.counter = 0
@@ -14,10 +14,16 @@ class TLClassifier(object):
 		self.class_dic = {1 : 'Red' , 2 : 'Yellow' , 3 : 'Green'}
 		self.color_dic = { 0: (255,255,255) , 1 : (0,0,255) , 2 : (0,255,255) , 3 : (0,255,0)}
 
+		if is_site:
+		    model_name = "model_real.pb"
+		else :
+		    model_name = "model_sim.pb"
+
 		with tf.Session(graph=self.graph) as sess:
+		    rospy.logwarn(model_name)
 		    self.sess = sess
 		    od_graph_def = tf.GraphDef()
-		    od_graph_def.ParseFromString(tf.gfile.GFile('light_classification/model_sim.pb', 'rb').read())
+		    od_graph_def.ParseFromString(tf.gfile.GFile('light_classification/' + model_name , 'rb').read())
 		    tf.import_graph_def(od_graph_def, name='')
 
 		    self.bounding_boxes_tensor     = self.graph.get_tensor_by_name('detection_boxes:0')
