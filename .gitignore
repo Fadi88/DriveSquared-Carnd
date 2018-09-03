@@ -2,3 +2,6 @@
 ros/build
 ros/devel
 
+*profile.tmp
+
+ros/src/tl_detector/output_images/*

@@ -49,10 +49,7 @@ class TLDetector(object):
         self.last_state = TrafficLight.UNKNOWN
         self.last_wp = -1
         self.state_count = 0
-        
-        self.waypoints_2d = None
-        self.waypoint_tree = None
-
+    
         self.waypoints_2d = None
         self.waypoint_tree = None
         self.wp_current = None
