@@ -6,17 +6,36 @@ import cv2
 import time
 
 class TLClassifier(object):
+<<<<<<< HEAD
     def __init__(self):
 		self.visualize = False
+=======
+    def __init__(self , is_site ):
+		self.visualize = False
+		self.processing_frame = False
+>>>>>>> 682a3001a3a496b7011ceeb20f7e95f5e262e3f5
 		self.counter = 0
 		self.graph = tf.Graph()
 		self.class_dic = {1 : 'Red' , 2 : 'Yellow' , 3 : 'Green'}
 		self.color_dic = { 0: (255,255,255) , 1 : (0,0,255) , 2 : (0,255,255) , 3 : (0,255,0)}
 
+<<<<<<< HEAD
 		with tf.Session(graph=self.graph) as sess:
 		    self.sess = sess
 		    od_graph_def = tf.GraphDef()
 		    od_graph_def.ParseFromString(tf.gfile.GFile('light_classification/model_sim.pb', 'rb').read())
+=======
+		if is_site:
+		    model_name = "model_real.pb"
+		else :
+		    model_name = "model_sim.pb"
+
+		with tf.Session(graph=self.graph) as sess:
+		    rospy.logwarn(model_name)
+		    self.sess = sess
+		    od_graph_def = tf.GraphDef()
+		    od_graph_def.ParseFromString(tf.gfile.GFile('light_classification/' + model_name , 'rb').read())
+>>>>>>> 682a3001a3a496b7011ceeb20f7e95f5e262e3f5
 		    tf.import_graph_def(od_graph_def, name='')
 
 		    self.bounding_boxes_tensor     = self.graph.get_tensor_by_name('detection_boxes:0')
@@ -35,6 +54,15 @@ class TLClassifier(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
+<<<<<<< HEAD
+=======
+        if self.processing_frame:
+            rospy.logwarn('recived new frame before processing last one droping new frame')
+            return
+    
+        self.processing_frame = True
+
+>>>>>>> 682a3001a3a496b7011ceeb20f7e95f5e262e3f5
         t0 = time.time()
         image = np.array(image)
 
@@ -56,9 +84,17 @@ class TLClassifier(object):
             #rospy.logwarn(scores[0])
             for detected_class , score in zip(classes[0] , scores[0]):
                 if int(detected_class) == 1 and score > 0.75 :
+<<<<<<< HEAD
                     rospy.logwarn('*************************** RED************************')
                     return TrafficLight.RED
 
+=======
+                    rospy.logwarn('***************************RED************************')
+                    self.processing_frame = False
+                    return TrafficLight.RED
+
+        self.processing_frame = False
+>>>>>>> 682a3001a3a496b7011ceeb20f7e95f5e262e3f5
         return TrafficLight.UNKNOWN
 
     def save_image(self , image , boxes , scores , classes):

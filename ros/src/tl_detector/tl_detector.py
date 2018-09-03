@@ -54,8 +54,13 @@ class TLDetector(object):
         self.waypoint_tree = None
         self.wp_current = None
         
+<<<<<<< HEAD
         self.light_classifier = TLClassifier()
         
+=======
+        self.light_classifier = TLClassifier(self.config['is_site'])
+
+>>>>>>> 682a3001a3a496b7011ceeb20f7e95f5e262e3f5
         rospy.spin()
 
     def pose_cb(self, msg):
